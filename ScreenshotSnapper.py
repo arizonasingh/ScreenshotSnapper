@@ -28,7 +28,7 @@ def build_driver(device):
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.headless = True # Set to true to run the program in the background (multi-tasking on other tasks is possible). Set to false to see the program running (warning: browser will open on screen so multi-tasking is not recommended as it will most likely affect the screen capture)
 
-    # j am re-sizing the browser window to meet specific device type dimensions
+    # I am re-sizing the browser window to meet specific device type dimensions
     # Mobile emulation is possible, but the way the screenshots are taken, the images are enlarged sections of page and don't stitch correctly
     # If someone wants to fix the scrolling and screenshot capture by using mobile emulation, uncomment and use the below configs
     # mobile_emulation = {"deviceName": "iPhone X"} # Can be any of Google Chrome's supported Emulated Devices
