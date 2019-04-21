@@ -10,7 +10,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 from PIL import Image
 from numpy import loadtxt
-import os, sys, time, ctypes, win32api, win32con, pywintypes
+import os, sys, time, ctypes, math, win32api, win32con, pywintypes
 
 def build_driver(device):
     chrome_options = webdriver.ChromeOptions()
@@ -33,23 +33,23 @@ def build_driver(device):
     # If someone wants to fix the scrolling and screenshot capture by using mobile emulation, uncomment and use the below configs
     # mobile_emulation = {"deviceName": "iPhone X"} # Can be any of Google Chrome's supported Emulated Devices
     # chrome_options.add_experimental_option("mobileEmulation", mobile_emulation)
-    # driver = webdriver.Chrome(options=chrome_options,desired_capabilities=chrome_options.to_capabilities())
-    # If someone can figure that out, please reach out to me via GitHub (link in documentation above) and push the changes into the branch so I can see and test
+    # driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options, desired_capabilities=chrome_options.to_capabilities())
+    # If someone can figure that out, please reach out to me via GitHub (link in documentation above) and push the changes into the branch so j can see and test
     if device is "D":
         desktop = {"width": 1920, "height": 1080} # Should match the screen resolution size for a fully expanded browser
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
         time.sleep(0.5) # add a wait to allow driver to fully initialize
         driver.set_window_size(desktop['width'], desktop["height"])
         time.sleep(0.5) # add a wait to window to fully re-size
     if device is "M":
         mobile = {"width": 375, "height": 812} #iPhone X dimensions; can be changed to meet your device configurations
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
         time.sleep(0.5) # add a wait to allow driver to fully initialize
         driver.set_window_size(mobile['width'], mobile["height"])
         time.sleep(0.5) # add a wait to window to fully re-size
     if device is "T":
         tablet = {"width": 768, "height": 1024} #iPad / iPad2 / iPad Mini dimensions; can be changed to meet your device configurations
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
         time.sleep(0.5) # add a wait to allow driver to fully initialize
         driver.set_window_size(tablet['width'], tablet["height"])
         time.sleep(0.5) # add a wait to window to fully re-size
@@ -57,72 +57,58 @@ def build_driver(device):
     return driver
 
 def fullpage_screenshot(driver, url, device, folder, filetype):
-        print(f"Taking screenshot of {url}")
+    print(f"Taking screenshot of {url}")
+    
+    js = ("window.document.styleSheets[0].insertRule(" + "'::-webkit-scrollbar {display: none;}', " + "window.document.styleSheets[0].cssRules.length);")
+    driver.execute_script(js)
+    total_height = driver.execute_script("return document.body.parentNode.scrollHeight")
+    viewport_width = driver.execute_script("return window.innerWidth")
+    viewport_height = driver.execute_script("return window.innerHeight")
+    scale = driver.execute_script("return window.devicePixelRatio")
+    
+    rectangles = []
 
-        total_width = driver.execute_script("return document.body.offsetWidth")
-        total_height = driver.execute_script("return document.body.parentNode.scrollHeight")
-        viewport_width = driver.execute_script("return document.body.clientWidth")
-        viewport_height = driver.execute_script("return window.innerHeight")
-        
-        rectangles = []
+    i = 0
+    while i < total_height:
+        viewport_top_height = i + viewport_height
 
-        i = 0
-        while i < total_height:
-            j = 0
-            top_height = i + viewport_height
+        if viewport_top_height > total_height:
+            i = total_height - viewport_height
+            viewport_top_height = total_height
 
-            if top_height > total_height:
-                top_height = total_height
+        rectangles.append((0, i, 0, viewport_top_height))
+        i = i + viewport_height
 
-            while j < total_width:
-                top_width = j + viewport_width
+    stitched_image = Image.new('RGB',(int(viewport_width * scale), int(total_height * scale)))
+    
+    for j, rectangle in enumerate(rectangles):
+        driver.execute_script(f"window.scrollTo({0}, {rectangle[1]})")
+        time.sleep(0.2)
 
-                if top_width > total_width:
-                    top_width = total_width
+        tmpImgName = f"section_{j}.png"
+        driver.get_screenshot_as_file(tmpImgName)
+        screenshot = Image.open(tmpImgName)
 
-                rectangles.append((j, i, top_width, top_height))
+        remove_sticky_navs(driver)
 
-                j += viewport_width
+        if (j + 1) * viewport_height > total_height:
+            offset = (0, int((total_height - viewport_height) * scale))
+        else:
+            offset = (0, int(j * viewport_height * scale - math.floor(j / 2.0)))
 
-            i += viewport_height
+        stitched_image.paste(screenshot, offset)
 
-        stitched_image = Image.new('RGB', (total_width, total_height))
-        previous = None
-        section = 0
+        del screenshot
+        os.remove(tmpImgName)
 
-        for rectangle in rectangles:
-            tmpImgName = f"section_{section}.png"
-            driver.get_screenshot_as_file(tmpImgName)
-            screenshot = Image.open(tmpImgName)
-            
-            if not previous is None:
-                driver.execute_script(f"window.scrollTo({rectangle[0]}, {rectangle[1]})")
-                time.sleep(0.2)
-                remove_sticky_navs(driver)
-
-            tmpImgName = f"section_{section}.png"
-            driver.get_screenshot_as_file(tmpImgName)
-            screenshot = Image.open(tmpImgName)
-
-            if rectangle[1] + viewport_height > total_height:
-                offset = (rectangle[0], total_height - viewport_height)
-            else:
-                offset = (rectangle[0], rectangle[1])
-
-            stitched_image.paste(screenshot, offset)
-
-            del screenshot
-            os.remove(tmpImgName)
-            section = section + 1
-            previous = rectangle
-
-        # files have naming restrictions
-        # saving file as name of url, thus handling common url characters that are restricted in file names
-        # file name can be changed below or additional restrictions handled
-        fileName = url.replace("://", "_")
-        fileName = fileName.replace("/", "_")
-        fileName = fileName.replace("?", "_")
-        stitched_image.save(folder+fileName+filetype)
+    # files have naming restrictions
+    # saving file as name of url, thus handling common url characters that are restricted in file names
+    # file name can be changed below or additional restrictions handled
+    fileName = url.replace("://", "_")
+    fileName = fileName.replace("/", "_")
+    fileName = fileName.replace("?", "_")
+    stitched_image.save(folder+fileName+filetype)
+    del stitched_image
 
 def btn_clicks(driver):
     # parts of the page may need to be clicked based on your screenshot needs
@@ -141,12 +127,8 @@ def remove_sticky_navs(driver):
     # add as many try/except clauses as you need to fit all your page needs
     # examples included below - since it's a try/catch, even if elements are not on the page, the program will not crash
     try:
-        driver.execute_script("$('.header-wrapper').remove();") # nav bar can be removed
+        driver.execute_script("$('.header-wrapper').remove();") # nav bar can be removed or fixed into place (static or absolute work in most cases for position property - try .attr('style','position: static !important'); instead of .remove();)
         time.sleep(0.1)
-    except:
-        time.sleep(0.1)
-    try:
-        driver.execute_script("$('.subnav__wrapper').attr('style','position: static !important');") # nav bar can also be fixed in place (static or absolute work in most cases for position property)
     except:
         time.sleep(0.1)
 
