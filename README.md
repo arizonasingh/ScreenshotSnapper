@@ -25,7 +25,7 @@ This can be used by many professionals who have to take screenshots of webpages 
 Special thanks to MrColes of https://mrcoles.com/full-page-screen-capture-chrome-extension/ for giving me inspiration.
 I use the Google Chrome extension heavily but wanted to automate the process so I made this program.
 
-Special thanks to this willjobs of https://github.com/willjobs/fullpage-screenshot
+Special thanks to this willjobs of https://github.com/willjobs/fullpage-screenshot.
 The code for screen capture and page scrolling (key feature) was adapted from that repo.
 
 ## Final Remarks:
