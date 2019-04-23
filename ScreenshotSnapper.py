@@ -10,7 +10,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 from PIL import Image
 from numpy import loadtxt
-import os, sys, time, ctypes, math, win32api, win32con, pywintypes
+import os, sys, time, ctypes, math
 
 def build_driver(device):
     chrome_options = webdriver.ChromeOptions()
@@ -59,8 +59,15 @@ def build_driver(device):
 def fullpage_screenshot(driver, url, device, folder, filetype):
     print(f"Taking screenshot of {url}")
     
-    js = ("window.document.styleSheets[0].insertRule(" + "'::-webkit-scrollbar {display: none;}', " + "window.document.styleSheets[0].cssRules.length);")
-    driver.execute_script(js)
+    # remove the browser right side scrollbar from the screenshot
+    # some pages do not allow the below javascript to execute, hence adding in a try/except
+    try:
+        js = ("window.document.styleSheets[0].insertRule(" + "'::-webkit-scrollbar {display: none;}', " + "window.document.styleSheets[0].cssRules.length);")
+        driver.execute_script(js)
+    except:
+        print("This page did not allow the right scrollbar to be removed from the screenshot")
+        time.sleep(0.1)
+        
     total_height = driver.execute_script("return document.body.parentNode.scrollHeight")
     viewport_width = driver.execute_script("return window.innerWidth")
     viewport_height = driver.execute_script("return window.innerHeight")
@@ -161,8 +168,9 @@ def multiple_urls(device, folder, filetype):
             wrongURLs += url + "\n"
     
     if wrongURLs:
-        win32api.ChangeDisplaySettings(None, 0)
-        time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
+        if sys.platform == "win32": # change screen resolution if on a Windows OS machine
+            win32api.ChangeDisplaySettings(None, 0)
+            time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
         ctypes.windll.user32.MessageBoxW(0, "The following do not start with \"https://\" and must be fixed:\n\n" + wrongURLs, "Invalid URL Error!", 0)
         sys.exit()
     
@@ -185,7 +193,9 @@ def screen_resolution(width, height):
     time.sleep(3.0) # add a wait to allow all elements on screen to adjust to new screen resolution
 
 if __name__ == '__main__':
-    screen_resolution(1920, 1080) # Depending on computer monitor size, resolution may need to be adjusted
+    if sys.platform == "win32": # change screen resolution if on a Windows OS machine
+        import win32api, win32con, pywintypes
+        screen_resolution(1920, 1080) # Depending on computer monitor size, resolution may need to be adjusted
 
     device = input("Please select a device ([D]esktop | [M]obile | [T]ablet): ")
 
@@ -229,6 +239,7 @@ if __name__ == '__main__':
         sys.exit()
 
     # after all screenshots taken, restore the screen resolution and open the folder
-    win32api.ChangeDisplaySettings(None, 0)
-    time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
+    if sys.platform == "win32": # change screen resolution if on a Windows OS machine
+        win32api.ChangeDisplaySettings(None, 0)
+        time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
     os.startfile(folder)
