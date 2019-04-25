@@ -1,3 +1,4 @@
+__version__ = "1.4.0"
 """
 Author: Anmol Singh
 GitHub: https://github.com/arizonasingh/
@@ -12,12 +13,12 @@ from selenium.webdriver.common.keys import Keys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PIL import Image
 from numpy import loadtxt
-import os, sys, time, ctypes, math
+import os, sys, time, datetime, ctypes, math
 ### IMPORTS END HERE ###
 
 ### GLOBAL VARIABLES BEGIN HERE ###
 device = "D" # default set to Desktop
-imgFileType = ".pdf" # default set to PDF file type
+filetype = ".pdf" # default set to PDF file type
 URL = ""
 URLFile = ""
 appSubmit = False
@@ -169,12 +170,12 @@ class Ui_Dialog(object):
                 device = "T"
 
         def setPDF(self):
-                global imgFileType
-                imgFileType = ".pdf"
+                global filetype
+                filetype = ".pdf"
 
         def setPNG(self):
-                global imgFileType
-                imgFileType = ".png"
+                global filetype
+                filetype = ".png"
 
         def setSingleURLBtn(self):
                 self.URLFile.setText("") # clear out any text if any in opposite field
@@ -200,10 +201,6 @@ class Ui_Dialog(object):
                 Dialog.close() # close GUI if user hits submit button
         
         def setCancelBtn(self):
-                if sys.platform == "win32": # change screen resolution if on a Windows OS machine
-                    import win32api
-                    win32api.ChangeDisplaySettings(None, 0)
-                    time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
                 sys.exit() # close program if user hits close button
 
         def setHelpBtn(self):
@@ -238,35 +235,46 @@ class ScreenshotCapture(object):
         # If someone can figure that out, please reach out to me via GitHub (link in documentation above) and push the changes into the branch so j can see and test
         if device is "D":
             desktop = {"width": 1920, "height": 1080} # Should match the screen resolution size for a fully expanded browser
-            driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+            try:
+                driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+            except:
+                ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v73 of higher is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
+                sys.exit() # close program if there is a chromedriver error
             time.sleep(0.5) # add a wait to allow driver to fully initialize
             driver.set_window_size(desktop['width'], desktop["height"])
-            time.sleep(0.5) # add a wait to window to fully re-size
+            time.sleep(0.5) # add a wait to allow window to fully re-size
         if device is "M":
             mobile = {"width": 375, "height": 812} #iPhone X dimensions; can be changed to meet your device configurations
-            driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+            try:
+                driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+            except:
+                ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v73 of higher is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
+                sys.exit() # close program if there is a chromedriver error
             time.sleep(0.5) # add a wait to allow driver to fully initialize
             driver.set_window_size(mobile['width'], mobile["height"])
-            time.sleep(0.5) # add a wait to window to fully re-size
+            time.sleep(0.5) # add a wait to allow window to fully re-size
         if device is "T":
             tablet = {"width": 768, "height": 1024} #iPad / iPad2 / iPad Mini dimensions; can be changed to meet your device configurations
-            driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+            try:
+                driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+            except:
+                ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v73 of higher is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
+                sys.exit() # close program if there is a chromedriver error
             time.sleep(0.5) # add a wait to allow driver to fully initialize
             driver.set_window_size(tablet['width'], tablet["height"])
-            time.sleep(0.5) # add a wait to window to fully re-size
+            time.sleep(0.5) # add a wait to allow window to fully re-size
 
         return driver
 
     def fullpage_screenshot(self, driver, url, device, folder, filetype):
         print(f"Taking screenshot of {url}")
         
-        # remove the browser right side scrollbar from the screenshot
-        # some pages do not allow the below javascript to execute, hence adding in a try/except
+        # remove the browser vertical right side scrollbar from the screenshot
+        # should work in all pages but since it is Javascript, it's good practice to enter in a try/except
         try:
-            js = ("window.document.styleSheets[0].insertRule(" + "'::-webkit-scrollbar {display: none;}', " + "window.document.styleSheets[0].cssRules.length);")
-            driver.execute_script(js)
+            driver.execute_script("document.body.style.overflow = 'hidden';")
         except:
-            print("This page did not allow the right scrollbar to be removed from the screenshot")
+            print("This page did not allow the vertical scrollbar to be removed from the screenshot")
             time.sleep(0.1)
 
         total_height = driver.execute_script("return document.body.parentNode.scrollHeight")
@@ -310,12 +318,36 @@ class ScreenshotCapture(object):
             os.remove(tmpImgName)
 
         # files have naming restrictions
-        # saving file as name of url, thus handling common url characters that are restricted in file names
+        # saving file as name of url (the below list covers filename forbidden characters)
+        # not all below are valid URL characters but if ever functionality changed from URL to something else as the fileName, the below will cover all restrictions
         # file name can be changed below or additional restrictions handled
         fileName = url.replace("://", "_")
+        fileName = fileName.replace("\\", "_")
         fileName = fileName.replace("/", "_")
+        fileName = fileName.replace(":", "_")
+        fileName = fileName.replace("*", "_")
         fileName = fileName.replace("?", "_")
-        stitched_image.save(folder+fileName+filetype)
+        fileName = fileName.replace("\"", "_")
+        fileName = fileName.replace("<", "_")
+        fileName = fileName.replace(">", "_")
+        fileName = fileName.replace("|", "_")
+        
+        timestamp = datetime.datetime.fromtimestamp(time.time()).strftime("  %Y-%m-%d %H_%M_%S")
+    
+        try:
+            stitched_image.save(folder+fileName+filetype)
+        except:
+            fileNameExcessiveLength = True
+            while fileNameExcessiveLength:
+                fileName = fileName[:-1] # keep removing last character from fileName until length is short enough to be saved
+                if os.path.exists(folder+fileName+filetype):
+                    fileName = fileName[:-21] + timestamp # if by shortening fileName the name already exists in the directory, add a timestamp to diferentiate (remove same number of characters as the timestamp from fileName)
+                try:
+                    stitched_image.save(folder+fileName+filetype)
+                    fileNameExcessiveLength = False # end loop if file is saved
+                except:
+                    fileName = fileName[:-1] # not needed again since already at top but it will speed up the process a bit
+        
         del stitched_image
 
     def btn_clicks(self, driver):
@@ -323,7 +355,7 @@ class ScreenshotCapture(object):
         # add as many try/except clauses as you need to fit all your page needs
         # examples included below - since it's a try/catch, even if elements are not on the page, the program will not crash
         try:
-            BoxExpand = (driver.find_element_by_xpath("//*[contains(text(),'Expand')]")).click()
+            BoxExpand = (driver.find_element_by_xpath("//*[contains(text(),'Expand')]")).click() # for example if a T&C box needed to be expanded to capture full text in screenshot
         except:
             time.sleep(0.1)
         
@@ -336,7 +368,7 @@ class ScreenshotCapture(object):
         # examples included below - since it's a try/catch, even if elements are not on the page, the program will not crash
         try:
             driver.execute_script("$('.header-wrapper').remove();") # nav bar can be removed or fixed into place (static or absolute work in most cases for position property - try .attr('style','position: static !important'); instead of .remove();)
-            time.sleep(0.1)
+            time.sleep(0.1)                                         # header-wrapper is common bootstrap nav bar class name
         except:
             time.sleep(0.1)
 
@@ -344,9 +376,6 @@ class ScreenshotCapture(object):
         global URL
 
         while not URL.startswith("https://"):
-            if sys.platform == "win32": # change screen resolution if on a Windows OS machine
-                win32api.ChangeDisplaySettings(None, 0)
-                time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
             ctypes.windll.user32.MessageBoxW(0, "The URL entered does not start with \"https://\" and must be fixed:\n\n" + URL, "Invalid URL Error!", 0)
             sys.exit()
         
@@ -370,9 +399,6 @@ class ScreenshotCapture(object):
                 wrongURLs += url + "\n"
         
         if wrongURLs:
-            if sys.platform == "win32": # change screen resolution if on a Windows OS machine
-                win32api.ChangeDisplaySettings(None, 0)
-                time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
             ctypes.windll.user32.MessageBoxW(0, "The following do not start with \"https://\" and must be fixed:\n\n" + wrongURLs, "Invalid URL Error!", 0)
             sys.exit()
         
@@ -384,15 +410,6 @@ class ScreenshotCapture(object):
         
         print("Done!")
         driver.quit()
-
-    def screen_resolution(self, width, height):
-        devmode = pywintypes.DEVMODEType()
-        # adjust as necessary based on screen size
-        devmode.PelsWidth = width
-        devmode.PelsHeight = height
-        devmode.Fields = win32con.DM_PELSWIDTH | win32con.DM_PELSHEIGHT
-        win32api.ChangeDisplaySettings(devmode, 0)
-        time.sleep(2.0) # add a wait to allow all elements on screen to adjust to new screen resolution
 
 ### SCREENSHOT CAPTURE ENDS HERE ###
 
@@ -410,10 +427,6 @@ if __name__ == '__main__':
 
     # after GUI closes
     if appSubmit:
-        if sys.platform == "win32": # change screen resolution if on a Windows OS machine
-            import win32api, win32con, pywintypes
-            ss.screen_resolution(1920, 1080) # Depending on computer monitor size, resolution may need to be adjusted
-
         if device is "D":
             folder = "Screenshots\\Desktop\\"
         if device is "M":
@@ -425,14 +438,11 @@ if __name__ == '__main__':
             os.makedirs(folder)
 
         if URL: # if single URL option selected from GUI
-            ss.single_url(device, folder, imgFileType)
+            ss.single_url(device, folder, filetype)
         elif URLFile: # if multiple URLs option selected from GUI
-            ss.multiple_urls(device, folder, imgFileType)
+            ss.multiple_urls(device, folder, filetype)
 
         # after all screenshots taken, restore the screen resolution and open the folder
-        if sys.platform == "win32": # change screen resolution if on a Windows OS machine
-            win32api.ChangeDisplaySettings(None, 0)
-            time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
         os.startfile(folder)
 
 ### APPLICATION EXECUTION ENDS HERE ###
