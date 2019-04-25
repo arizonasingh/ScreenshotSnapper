@@ -1,0 +1,4 @@
+selenium==3.141.0
+numpy==1.16.2
+Pillow==6.0.0
+PyQt5==5.12.1

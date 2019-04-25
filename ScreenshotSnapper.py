@@ -1,17 +1,21 @@
+__version__ = "1.4.0"
 """
-Author(s): Anmol Singh
+Author: Anmol Singh
 GitHub: https://github.com/arizonasingh/
 Purpose: To automate the process of capturing full web page screenshots in multiple viewports (desktop, mobile, tablet)
 Date Created: 12 Apr 2019
 """
 
+### IMPORTS BEGIN HERE ###
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 from PIL import Image
 from numpy import loadtxt
-import os, sys, time, ctypes, math
+import os, sys, time, datetime, ctypes, math
+### IMPORTS END HERE ###
 
+### SCREENSHOT CAPTURE BEGINS HERE ###
 def build_driver(device):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("test-type")
@@ -37,35 +41,46 @@ def build_driver(device):
     # If someone can figure that out, please reach out to me via GitHub (link in documentation above) and push the changes into the branch so j can see and test
     if device is "D":
         desktop = {"width": 1920, "height": 1080} # Should match the screen resolution size for a fully expanded browser
-        driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+        try:
+            driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+        except:
+            ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v73 of higher is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
+            sys.exit() # close program if there is a chromedriver error
         time.sleep(0.5) # add a wait to allow driver to fully initialize
         driver.set_window_size(desktop['width'], desktop["height"])
-        time.sleep(0.5) # add a wait to window to fully re-size
+        time.sleep(0.5) # add a wait to allow window to fully re-size
     if device is "M":
         mobile = {"width": 375, "height": 812} #iPhone X dimensions; can be changed to meet your device configurations
-        driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+        try:
+            driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+        except:
+            ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v73 of higher is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
+            sys.exit() # close program if there is a chromedriver error
         time.sleep(0.5) # add a wait to allow driver to fully initialize
         driver.set_window_size(mobile['width'], mobile["height"])
-        time.sleep(0.5) # add a wait to window to fully re-size
+        time.sleep(0.5) # add a wait to allow window to fully re-size
     if device is "T":
         tablet = {"width": 768, "height": 1024} #iPad / iPad2 / iPad Mini dimensions; can be changed to meet your device configurations
-        driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+        try:
+            driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
+        except:
+            ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v73 of higher is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
+            sys.exit() # close program if there is a chromedriver error
         time.sleep(0.5) # add a wait to allow driver to fully initialize
         driver.set_window_size(tablet['width'], tablet["height"])
-        time.sleep(0.5) # add a wait to window to fully re-size
+        time.sleep(0.5) # add a wait to allow window to fully re-size
 
     return driver
 
-def fullpage_screenshot(driver, url, device, folder, filetype):
-    print(f"Taking screenshot of {url}")
+def fullpage_screenshot(driver, URL, device, folder, filetype):
+    print(f"Taking screenshot of {URL}")
     
-    # remove the browser right side scrollbar from the screenshot
-    # some pages do not allow the below javascript to execute, hence adding in a try/except
+    # remove the browser vertical right side scrollbar from the screenshot
+    # should work in all pages but since it is Javascript, it's good practice to enter in a try/except
     try:
-        js = ("window.document.styleSheets[0].insertRule(" + "'::-webkit-scrollbar {display: none;}', " + "window.document.styleSheets[0].cssRules.length);")
-        driver.execute_script(js)
+        driver.execute_script("document.body.style.overflow = 'hidden';")
     except:
-        print("This page did not allow the right scrollbar to be removed from the screenshot")
+        print("This page did not allow the vertical scrollbar to be removed from the screenshot")
         time.sleep(0.1)
         
     total_height = driver.execute_script("return document.body.parentNode.scrollHeight")
@@ -107,14 +122,38 @@ def fullpage_screenshot(driver, url, device, folder, filetype):
 
         del screenshot
         os.remove(tmpImgName)
-
+    
     # files have naming restrictions
-    # saving file as name of url, thus handling common url characters that are restricted in file names
+    # saving file as name of URL (the below list covers filename forbidden characters)
+    # not all below are valid URL characters but if ever functionality changed from URL to something else as the fileName, the below will cover all restrictions
     # file name can be changed below or additional restrictions handled
-    fileName = url.replace("://", "_")
+    fileName = URL.replace("://", "_")
+    fileName = fileName.replace("\\", "_")
     fileName = fileName.replace("/", "_")
+    fileName = fileName.replace(":", "_")
+    fileName = fileName.replace("*", "_")
     fileName = fileName.replace("?", "_")
-    stitched_image.save(folder+fileName+filetype)
+    fileName = fileName.replace("\"", "_")
+    fileName = fileName.replace("<", "_")
+    fileName = fileName.replace(">", "_")
+    fileName = fileName.replace("|", "_")
+    
+    timestamp = datetime.datetime.fromtimestamp(time.time()).strftime("  %Y-%m-%d %H_%M_%S")
+    
+    try:
+        stitched_image.save(folder+fileName+filetype)
+    except:
+        fileNameExcessiveLength = True
+        while fileNameExcessiveLength:
+            fileName = fileName[:-1] # keep removing last character from fileName until length is short enough to be saved
+            if os.path.exists(folder+fileName+filetype):
+                fileName = fileName[:-21] + timestamp # if by shortening fileName the name already exists in the directory, add a timestamp to diferentiate (remove same number of characters as the timestamp from fileName)
+            try:
+                stitched_image.save(folder+fileName+filetype)
+                fileNameExcessiveLength = False # end loop if file is saved
+            except:
+                fileName = fileName[:-1] # not needed again since already at top but it will speed up the process a bit
+    
     del stitched_image
 
 def btn_clicks(driver):
@@ -122,7 +161,7 @@ def btn_clicks(driver):
     # add as many try/except clauses as you need to fit all your page needs
     # examples included below - since it's a try/catch, even if elements are not on the page, the program will not crash
     try:
-        BoxExpand = (driver.find_element_by_xpath("//*[contains(text(),'Expand')]")).click()
+        BoxExpand = (driver.find_element_by_xpath("//*[contains(text(),'Expand')]")).click() # for example if a T&C box needed to be expanded to capture full text in screenshot
     except:
         time.sleep(0.1)
     
@@ -135,68 +174,55 @@ def remove_sticky_navs(driver):
     # examples included below - since it's a try/catch, even if elements are not on the page, the program will not crash
     try:
         driver.execute_script("$('.header-wrapper').remove();") # nav bar can be removed or fixed into place (static or absolute work in most cases for position property - try .attr('style','position: static !important'); instead of .remove();)
-        time.sleep(0.1)
+        time.sleep(0.1)                                         # header-wrapper is common bootstrap nav bar class name
     except:
         time.sleep(0.1)
 
 def single_url(device, folder, filetype):
-    url = input("\nEnter the URL: ")
+    URL = input("\nEnter the URL: ")
 
-    while not url.startswith("https://"):
-        url = input("\nInvalid URL! Please enter a URL that starts with \"https://\": ")
+    while not URL.startswith("https://"):
+        URL = input("\nInvalid URL! Please enter a URL that starts with \"https://\": ")
     
     driver = build_driver(device)
-    driver.get(url)
+    driver.get(URL)
 
     btn_clicks(driver)
-    fullpage_screenshot(driver, url, device, folder, filetype)
+    fullpage_screenshot(driver, URL, device, folder, filetype)
     print("Done!")
     driver.quit()
 
 def multiple_urls(device, folder, filetype):
-    urlFile = input("\nPlease drag a \".txt\" file here containing all the URLs on a new line: ")
+    URLFile = input("\nPlease drag a \".txt\" file here containing all the URLs on a new line: ")
     
-    while not urlFile.endswith(".txt"): # Can be adjusted based on your requirements. Feeding in a CSV for very large lists is recommended
-        urlFile = input("\nThat is not a valid file. Please drag a \".txt\" file here: ")
+    while not URLFile.endswith(".txt"): # Can be adjusted based on your requirements. Feeding in a CSV for very large lists is recommended
+        URLFile = input("\nThat is not a valid file. Please drag a \".txt\" file here: ")
     
-    urlList = loadtxt(urlFile, dtype=str, comments="#", delimiter="\n", unpack=False)
+    urlList = loadtxt(URLFile, dtype=str, comments="#", delimiter="\n", unpack=False)
 
     wrongURLs = ""
 
-    for url in urlList:
-        if not url.startswith("https://"):
-            wrongURLs += url + "\n"
+    for URL in urlList:
+        if not URL.startswith("https://"):
+            wrongURLs += URL + "\n"
     
     if wrongURLs:
-        if sys.platform == "win32": # change screen resolution if on a Windows OS machine
-            win32api.ChangeDisplaySettings(None, 0)
-            time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
         ctypes.windll.user32.MessageBoxW(0, "The following do not start with \"https://\" and must be fixed:\n\n" + wrongURLs, "Invalid URL Error!", 0)
         sys.exit()
     
     driver = build_driver(device)
-    for url in urlList:
-        driver.get(url)
+    for URL in urlList:
+        driver.get(URL)
         btn_clicks(driver)
-        fullpage_screenshot(driver, url, device, folder, filetype)
+        fullpage_screenshot(driver, URL, device, folder, filetype)
     
     print("Done!")
     driver.quit()
 
-def screen_resolution(width, height):
-    devmode = pywintypes.DEVMODEType()
-    # adjust as necessary based on screen size
-    devmode.PelsWidth = width
-    devmode.PelsHeight = height
-    devmode.Fields = win32con.DM_PELSWIDTH | win32con.DM_PELSHEIGHT
-    win32api.ChangeDisplaySettings(devmode, 0)
-    time.sleep(3.0) # add a wait to allow all elements on screen to adjust to new screen resolution
+### SCREENSHOT CAPTURE ENDS HERE ###
 
+### APPLICATION EXECUTION BEGINS HERE ###
 if __name__ == '__main__':
-    if sys.platform == "win32": # change screen resolution if on a Windows OS machine
-        import win32api, win32con, pywintypes
-        screen_resolution(1920, 1080) # Depending on computer monitor size, resolution may need to be adjusted
-
     device = input("Please select a device ([D]esktop | [M]obile | [T]ablet): ")
 
     while device not in ("D","M","T"):
@@ -225,7 +251,7 @@ if __name__ == '__main__':
         filetype = ".png" # change based on your requirements
 
     print("\n***NOTE: All URLs must start with \"https://\" and for Mobile and Tablet screenshots to be captured properly, the webpage must be responive***") #If mobile emulation works (see note in build_driver(device) method above), then the note about mobile and tablet can be removed
-    option = input("\n[1] Single URL \n[2] Multiple URLs \n[3] Close Program and Restore Screen Resolution \n\nPlease select an option ([1]/[2]/[3]): ")
+    option = input("\n[1] Single URL \n[2] Multiple URLs \n[3] Close Program \n\nPlease select an option ([1]/[2]/[3]): ")
 
     while option not in ("1","2","3"):
         print("\nNot a valid option")
@@ -235,11 +261,9 @@ if __name__ == '__main__':
     elif option is "2":
         multiple_urls(device, folder, filetype)
     elif option is "3":
-        win32api.ChangeDisplaySettings(None, 0)
         sys.exit()
 
-    # after all screenshots taken, restore the screen resolution and open the folder
-    if sys.platform == "win32": # change screen resolution if on a Windows OS machine
-        win32api.ChangeDisplaySettings(None, 0)
-        time.sleep(1.0) # add a wait to allow all elements on screen to adjust to new screen resolution
+    # after all screenshots taken, open the folder containing the screenshots
     os.startfile(folder)
+
+### APPLICATION EXECUTION ENDS HERE ###
