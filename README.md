@@ -4,9 +4,8 @@ Allows for webpage screenshot automation for desktop, mobile, and tablet viewpor
 Example screenshots included!
 
 ## Prerequisites:
-1. If using Windows OS, Screen resolution of 1920x1080 should look good (text and apps are not blurry) on your machine (can be changed within the script).
-2. Google Chrome v73 or higher should be installed.
-3. All webpages should be responsive.
+1. Google Chrome v73 or higher should be installed.
+2. All webpages should be responsive.
 
 NOTE: This repo has only be tested on Windows OS, however this is nothing to suggest that this program is not platform independent. It should work for all OS. If not, slight adjustments can be made easily to adapt to OS needs. However, is using a non-Windows OS, the program will not be able to adjust the screen resolution which may or may not affect the screenshots depending on your device. Example screenshots are included - can be used for comparison if using a different OS than Windows. 
 
