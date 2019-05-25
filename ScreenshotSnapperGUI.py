@@ -1,4 +1,4 @@
-__version__ = "1.4.0"
+__version__ = "1.4.1"
 """
 Author: Anmol Singh
 GitHub: https://github.com/arizonasingh/
@@ -238,7 +238,7 @@ class ScreenshotCapture(object):
             try:
                 driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
             except:
-                ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v73 of higher is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
+                ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v74 is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
                 sys.exit() # close program if there is a chromedriver error
             time.sleep(0.5) # add a wait to allow driver to fully initialize
             driver.set_window_size(desktop['width'], desktop["height"])
@@ -248,7 +248,7 @@ class ScreenshotCapture(object):
             try:
                 driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
             except:
-                ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v73 of higher is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
+                ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v74 is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
                 sys.exit() # close program if there is a chromedriver error
             time.sleep(0.5) # add a wait to allow driver to fully initialize
             driver.set_window_size(mobile['width'], mobile["height"])
@@ -258,7 +258,7 @@ class ScreenshotCapture(object):
             try:
                 driver = webdriver.Chrome(executable_path="Drivers\\Chromedriver\\chromedriver.exe", options=chrome_options)
             except:
-                ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v73 of higher is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
+                ctypes.windll.user32.MessageBoxW(0, "Program could not execute! Possible errors:\n\n1. Google Chrome v74 is not installed on your device\n2. Missing Chromedriver. Could not find \"Drivers/Chromedriver/Chromedriver.exe\" which is often the result of moving the application from the source location. To use outside its source location, \"copy\" or \"create a shortcut\" but do not move the original program from its source location unless all dependencies are moved along with it.", "Chromedriver Error!", 0)
                 sys.exit() # close program if there is a chromedriver error
             time.sleep(0.5) # add a wait to allow driver to fully initialize
             driver.set_window_size(tablet['width'], tablet["height"])
