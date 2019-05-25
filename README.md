@@ -6,10 +6,11 @@ Example screenshots included!
 ## Prerequisites:
 1. Google Chrome v74 should be installed.
 2. All webpages should be responsive.
+3. Program should be run only on Windows OS (see notes below)
 
-NOTE: This repo has only be tested on Windows OS. File paths need to be adjusted if using a different OS. Example screenshots are included - can be used for comparison if using a different OS than Windows. 
+NOTE: This repo has only be tested on Windows OS. File paths need to be adjusted if using a different OS. Example screenshots are included - can be used for comparison if using a different OS. Additionally, only the Windows version of Chromedriver is included in this repo. If using a different OS, please download the corresponding version of Chromedriver and place in the correct folder. 
 
-NOTE: Google Chrome version 74 should be installed on your computer. Chromedriver74 is included in this repo. It's included in the repo so the executable works out the box. When making changes specific to your program needs, the program can be freezed with the local path of the chromedriver so the program works for anyone who receives the full repo distribution. If using only for yourself, it's better to add chromedriver to your PATH. It can also be freezed and packages as an executable with chromedriver within the program, but for the purposes of this repo, I did not do that as some people may not know how to do that as easily as just referencing the local path of the chromedriver.
+NOTE: Google Chrome version 74 should be installed on your computer. Chromedriver74 (Windows OS version) is included in this repo. It's included in the repo so the executable works out the box (however due to sticky nav bar menus, it is not recommended to use out of the box without making configurations specific to your need). When making changes specific to your program needs, the program can be freezed with the local path of the chromedriver so the program works for anyone who receives the full repo distribution. If using only for yourself, it's better to add chromedriver to your PATH. It can also be freezed and packages as an executable with chromedriver within the program, but for the purposes of this repo, I did not do that as some people may not know how to do that as easily as just referencing the local relative path of the chromedriver.
 
 ## Additional Details:
 If you encounter sticky nav bars on the webpage, you must enter javascript into the webpage to handle those (this can be done via the program). Since those are different for each webpage, I have included a couple examples in the code to show how it should be done and where it should be done. The same goes for any page interactions needed on the page before screen capture such as clicking a button.
