@@ -151,7 +151,7 @@ class Ui_Dialog(object):
                 self.URL.setPlaceholderText(_translate("Dialog", "URL must start with https://"))
                 self.URLFile.setPlaceholderText(_translate("Dialog", "Enter text file containing URLs"))
                 self.MultipleURLsBtn.setText(_translate("Dialog", "Multiple URLs"))
-                self.CancelBtn.setText(_translate("Dialog", "Close Program and Restore Screen Resolution"))
+                self.CancelBtn.setText(_translate("Dialog", "Close Program"))
                 self.label.setText(_translate("Dialog", "SELECT A DEVICE"))
                 self.label_2.setText(_translate("Dialog", "SAVE IMAGE AS"))
                 self.HelpBtn.setText(_translate("Dialog", "HELP"))
@@ -442,7 +442,7 @@ if __name__ == '__main__':
         elif URLFile: # if multiple URLs option selected from GUI
             ss.multiple_urls(device, folder, filetype)
 
-        # after all screenshots taken, restore the screen resolution and open the folder
+        # after all screenshots taken, open the folder containing the screenshots
         os.startfile(folder)
 
 ### APPLICATION EXECUTION ENDS HERE ###
