@@ -4,12 +4,12 @@ Allows for webpage screenshot automation for desktop, mobile, and tablet viewpor
 Example screenshots included!
 
 ## Prerequisites:
-1. Google Chrome v73 or higher should be installed.
+1. Google Chrome v74 should be installed.
 2. All webpages should be responsive.
 
-NOTE: This repo has only be tested on Windows OS, however this is nothing to suggest that this program is not platform independent. It should work for all OS. If not, slight adjustments can be made easily to adapt to OS needs. However, is using a non-Windows OS, the program will not be able to adjust the screen resolution which may or may not affect the screenshots depending on your device. Example screenshots are included - can be used for comparison if using a different OS than Windows. 
+NOTE: This repo has only be tested on Windows OS. File paths need to be adjusted if using a different OS. Example screenshots are included - can be used for comparison if using a different OS than Windows. 
 
-NOTE: Google Chrome version 73 or higher should be installed on your computer. Chromedriver73 is included in this repo. It's included in the repo so the executable works out the box. When making changes specific to your program needs, the program can be freezed with the local path of the chromedriver so the program works for anyone who receives the full repo distribution. If using only for yourself, it's better to add chromedriver to your PATH. It can also be freezed and packages as an executable with chromedriver within the program, but for the purposes of this repo, I did not do that as some people may not know how to do that as easily as just referencing the local path of the chromedriver.
+NOTE: Google Chrome version 74 should be installed on your computer. Chromedriver74 is included in this repo. It's included in the repo so the executable works out the box. When making changes specific to your program needs, the program can be freezed with the local path of the chromedriver so the program works for anyone who receives the full repo distribution. If using only for yourself, it's better to add chromedriver to your PATH. It can also be freezed and packages as an executable with chromedriver within the program, but for the purposes of this repo, I did not do that as some people may not know how to do that as easily as just referencing the local path of the chromedriver.
 
 ## Additional Details:
 If you encounter sticky nav bars on the webpage, you must enter javascript into the webpage to handle those (this can be done via the program). Since those are different for each webpage, I have included a couple examples in the code to show how it should be done and where it should be done. The same goes for any page interactions needed on the page before screen capture such as clicking a button.
