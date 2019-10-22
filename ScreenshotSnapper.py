@@ -250,7 +250,7 @@ if __name__ == '__main__':
     elif filetype is "2":
         filetype = ".png" # change based on your requirements
 
-    print("\n***NOTE: All URLs must start with \"https://\" and for Mobile and Tablet screenshots to be captured properly, the webpage must be responive***") #If mobile emulation works (see note in build_driver(device) method above), then the note about mobile and tablet can be removed
+    print("\n***NOTE: All URLs must start with \"https://\" and for Mobile and Tablet screenshots to be captured properly, the webpage must be responsive***") #If mobile emulation works (see note in build_driver(device) method above), then the note about mobile and tablet can be removed
     option = input("\n[1] Single URL \n[2] Multiple URLs \n[3] Close Program \n\nPlease select an option ([1]/[2]/[3]): ")
 
     while option not in ("1","2","3"):
