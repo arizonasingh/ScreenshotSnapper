@@ -4,20 +4,11 @@ Allows for webpage screenshot automation for desktop, mobile, and tablet viewpor
 Example screenshots included!
 
 ## Prerequisites:
-1. Google Chrome v77 should be installed.
+1. Latest version of Google Chrome should be installed
 2. All webpages should be responsive.
-3. Program should be run only on Windows OS (see notes below)
-
-NOTE: This repo has only be tested on Windows OS. File paths need to be adjusted if using a different OS. Example screenshots are included - can be used for comparison if using a different OS. Additionally, only the Windows version of Chromedriver is included in this repo. If using a different OS, please download the corresponding version of Chromedriver and place in the correct folder. 
-
-NOTE: Google Chrome version 77 should be installed on your computer. Chromedriver77 (Windows OS version) is included in this repo. It's included in the repo so the executable works out the box (however due to sticky nav bar menus, it is not recommended to use out of the box without making configurations specific to your need). When making changes specific to your program needs, the program can be freezed with the local path of the chromedriver so the program works for anyone who receives the full repo distribution. If using only for yourself, it's better to add chromedriver to your PATH. It can also be freezed and packages as an executable with chromedriver within the program, but for the purposes of this repo, I did not do that as some people may not know how to do that as easily as just referencing the local relative path of the chromedriver.
 
 ## Additional Details:
 If you encounter sticky nav bars on the webpage, you must enter javascript into the webpage to handle those (this can be done via the program). Since those are different for each webpage, I have included a couple examples in the code to show how it should be done and where it should be done. The same goes for any page interactions needed on the page before screen capture such as clicking a button.
-
-If you have a very large list of URLs to feed into the script, I recommend using a CSV instead of a Text file. Small configurations will need to be made to handle CSV files if you choose that route.
-
-Mobile Emulation instead of browser window re-sizing is possible, however with the current implementation, it's incompatible with the screen capture feature. I have commented out where the mobile emulation should be done and how it should be done if anyone wants to tackle it. If you are able to make it work, please push a version to this repo so I may see and test.
 
 This can be used by many professionals who have to take screenshots of webpages frequently. Often times, many non-technical people will also benefit from such a program. This program is meant to be shared with all people, especially those non-technical people who could really benefit from such a tool. If you intend to share across to those people, I recommend providing it as an executable (I recommend PyInstaller to freeze or package the code). The GUI version will be especially helpful for those non-technical people. This program can also be of great use to automation testers who have to take many screen captures (especially of different viewports) for their daily job duties.
 
