@@ -1,4 +1,4 @@
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 """
 Author: Anmol Singh
 GitHub: https://github.com/arizonasingh/ScreenshotSnapper
@@ -11,13 +11,18 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from PIL import Image
-from numpy import loadtxt
 from pathlib import Path
-import os, sys, time, datetime, math
+import os
+import sys
+import time
+import datetime
+import math
 ### IMPORTS END HERE ###
 
 ### SCREENSHOT CAPTURE BEGINS HERE ###
 def build_driver(device):
+    os.environ['WDM_LOCAL'] = '1'
+
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("test-type")
     chrome_options.add_argument("no-sandbox")
@@ -37,20 +42,20 @@ def build_driver(device):
     # not recommended as it will most likely affect the screen capture)
 
     # I am re-sizing the browser window to meet specific device type dimensions
-    if device is "D":
+    if device == "D":
         desktop = {"width": 1920,
                    "height": 1080}  # Should match the screen resolution size for a fully expanded browser
         driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         time.sleep(0.5)  # add a wait to allow driver to fully initialize
         driver.set_window_size(desktop['width'], desktop["height"])
         time.sleep(0.5)  # add a wait to allow window to fully re-size
-    if device is "M":
+    if device == "M":
         mobile = {"width": 375, "height": 812}  # iPhonde X dimensions; can be changed to meet your device configurations
         driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         time.sleep(0.5)  # add a wait to allow driver to fully initialize
         driver.set_window_size(mobile['width'], mobile["height"])
         time.sleep(0.5)  # add a wait to allow window to fully re-size
-    if device is "T":
+    if device == "T":
         tablet = {"width": 768, "height": 1024}  # iPad / iPad2 / iPad Mini dimensions; can be changed to meet your
         # device configurations
         driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
@@ -60,8 +65,8 @@ def build_driver(device):
 
     return driver
 
-def fullpage_screenshot(driver, URL, folder, fileType):
-    print(f"Taking screenshot of {URL}")
+def fullpage_screenshot(driver, url, folder, filetype):
+    print(f"Taking screenshot of {url}")
 
     # remove the browser vertical right side scrollbar from the screenshot
     # should work in all pages but since it is Javascript, it's good practice to enter in a try/except
@@ -95,9 +100,9 @@ def fullpage_screenshot(driver, URL, folder, fileType):
         driver.execute_script(f"window.scrollTo({0}, {rectangle[1]})")
         time.sleep(0.2)
 
-        tmpImgName = f"section_{j}.png"
-        driver.get_screenshot_as_file(tmpImgName)
-        screenshot = Image.open(tmpImgName)
+        tmp_img_name = f"section_{j}.png"
+        driver.get_screenshot_as_file(tmp_img_name)
+        screenshot = Image.open(tmp_img_name)
 
         remove_sticky_navs(driver)
 
@@ -108,42 +113,42 @@ def fullpage_screenshot(driver, URL, folder, fileType):
 
         stitched_image.paste(screenshot, offset)
         # not all below are valid URL characters but if ever functionality changed from URL to something else as the
-        os.remove(tmpImgName)
+        os.remove(tmp_img_name)
 
     # files have naming restrictions so saving file as the name of the URL (the below list covers filename forbidden
     # characters). Not all below are valid URL characters but if ever functionality changed from URL to something else
-    # as the fileName, the below will cover all restrictions. The file name can be changed below or additional
+    # as the filename, the below will cover all restrictions. The file name can be changed below or additional
     # restrictions handled
-    fileName = URL.replace("://", "_")
-    fileName = fileName.replace("\\", "_")
-    fileName = fileName.replace("/", "_")
-    fileName = fileName.replace(":", "_")
-    fileName = fileName.replace("*", "_")
-    fileName = fileName.replace("?", "_")
-    fileName = fileName.replace("\"", "_")
-    fileName = fileName.replace("<", "_")
-    fileName = fileName.replace(">", "_")
-    fileName = fileName.replace("|", "_")
+    filename = url.replace("://", "_")
+    filename = filename.replace("\\", "_")
+    filename = filename.replace("/", "_")
+    filename = filename.replace(":", "_")
+    filename = filename.replace("*", "_")
+    filename = filename.replace("?", "_")
+    filename = filename.replace("\"", "_")
+    filename = filename.replace("<", "_")
+    filename = filename.replace(">", "_")
+    filename = filename.replace("|", "_")
 
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime("  %Y-%m-%d %H_%M_%S")
 
-    imagePath = Path.joinpath(folder, fileName + fileType)
+    image_path = Path.joinpath(folder, filename + filetype)
     try:
-        stitched_image.save(imagePath)
+        stitched_image.save(image_path)
     except:
-        fileNameExcessiveLength = True
-        while fileNameExcessiveLength:
-            fileName = fileName[:-1]  # keep removing last character from fileName until length is short enough to be
+        filename_excessive_length = True
+        while filename_excessive_length:
+            filename = filename[:-1]  # keep removing last character from filename until length is short enough to be
             # saved
-            if os.path.exists(imagePath):
-                fileName = fileName[:-21] + timestamp  # if by shortening fileName the name already exists in the
+            if os.path.exists(image_path):
+                filename = filename[:-21] + timestamp  # if by shortening filename the name already exists in the
                 # directory, add a timestamp to differentiate (remove same number of characters as the timestamp from
-                # fileName)
+                # filename)
             try:
-                stitched_image.save(imagePath)
-                fileNameExcessiveLength = False  # end loop if file is saved
+                stitched_image.save(image_path)
+                filename_excessive_length = False  # end loop if file is saved
             except:
-                fileName = fileName[:-1]  # not needed again since already at top but it will speed up the process a bit
+                filename = filename[:-1]  # not needed again since already at top but it will speed up the process a bit
 
     del stitched_image
 
@@ -153,8 +158,8 @@ def btn_clicks(driver):
     # add as many try/except clauses as you need to fit all your page needs
     # examples included below - since it's a try/catch, even if elements are not on the page, the program will not crash
     try:
-        BoxExpand = (driver.find_element_by_xpath(
-            "//*[contains(text(),'Expand')]")).click()  # for example if a T&C box needed to be expanded to capture
+        driver.find_element_by_xpath(
+            "//*[contains(text(),'Expand')]").click()  # for example if a T&C box needed to be expanded to capture
         # full text in screenshot
     except:
         time.sleep(0.1)
@@ -179,41 +184,40 @@ def remove_sticky_navs(driver):
 
 
 def single_url(device, folder, filetype):
-    URL = input("\nEnter the URL: ")
+    url = input("\nEnter the URL: ")
 
-    while not URL.startswith("https://"):
-        URL = input("\nInvalid URL! Please enter a URL that starts with \"https://\": ")
+    while not url.startswith("https://"):
+        url = input("\nInvalid URL! Please enter a URL that starts with \"https://\": ")
 
     driver = build_driver(device)
-    driver.get(URL)
+    driver.get(url)
 
     btn_clicks(driver)
-    fullpage_screenshot(driver, URL, folder, filetype)
+    fullpage_screenshot(driver, url, folder, filetype)
     print("Done!")
     driver.quit()
 
 
 def multiple_urls(device, folder, filetype):
-    URLFile = input("\nPlease drag a \".txt\" file here containing all the URLs on a new line: ")
+    url_file = input("\nPlease drag a \".txt\" file here containing all the URLs on a new line: ")
 
-    while not (URLFile.endswith(".txt")) or not os.path.exists(URLFile):  # Can be adjusted based on your
+    while not (url_file.endswith(".txt")) or not os.path.exists(url_file):  # Can be adjusted based on your
         # requirements. Feeding in a CSV for very large lists is recommended
-        URLFile = input("\nThat is not a valid file. Please drag a \".txt\" file here: ")
+        url_file = input("\nThat is not a valid file. Please drag a \".txt\" file here: ")
 
-    urlList = loadtxt(URLFile, dtype=str, comments="#", delimiter="\n", unpack=False)
+    url_list = open(url_file).read().splitlines()
+    wrong_urls = ""
 
-    wrongURLs = ""
-
-    for URL in urlList:
+    for URL in url_list:
         if not URL.startswith("https://"):
-            wrongURLs += URL + "\n"
+            wrong_urls += URL + "\n"
 
-    if wrongURLs:
-        print("The following do not start with \"https://\" and must be fixed:\n\n" + wrongURLs)
+    if wrong_urls:
+        print("The following do not start with \"https://\" and must be fixed:\n\n" + wrong_urls)
         sys.exit()
 
     driver = build_driver(device)
-    for URL in urlList:
+    for URL in url_list:
         driver.get(URL)
         btn_clicks(driver)
         fullpage_screenshot(driver, URL, folder, filetype)
@@ -237,30 +241,30 @@ def open_screenshots(folder):
 if __name__ == '__main__':
     device = input("Please select a device ([D]esktop | [M]obile | [T]ablet): ")
 
-    while device not in ("D", "M", "T"):
+    while device not in ({"D", "M", "T"}):
         print("\nNot a valid device")
         device = input("\nPlease select a device type ([D]/[M]/[T]): ")
 
-    if device is "D":
+    if device == "D":
         folder = Path("Screenshots/Desktop")
-    if device is "M":
+    if device == "M":
         folder = Path("Screenshots/Mobile")
-    if device is "T":
+    if device == "T":
         folder = Path("Screenshots/Tablet")
 
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    fileType = input("\nSave image as ([1]PDF | [2]PNG): ")  # can be changed to meet your requirements
+    filetype = input("\nSave image as ([1]PDF | [2]PNG): ")  # can be changed to meet your requirements
 
-    while fileType not in ("1", "2"):
+    while filetype not in ("1", "2"):
         print("\nNot a valid file type option")
-        fileType = input("\nPlease select a file type option ([1]/[2]): ")
+        filetype = input("\nPlease select a file type option ([1]/[2]): ")
 
-    if fileType is "1":
-        fileType = ".pdf"  # change based on your requirements
-    elif fileType is "2":
-        fileType = ".png"  # change based on your requirements
+    if filetype == "1":
+        filetype = ".pdf"  # change based on your requirements
+    elif filetype == "2":
+        filetype = ".png"  # change based on your requirements
 
     print("\n***NOTE: All URLs must start with \"https://\" and for Mobile and Tablet screenshots to be captured "
           "properly, the web page must be responsive***")
@@ -270,11 +274,11 @@ if __name__ == '__main__':
     while option not in ("1", "2", "3"):
         print("\nNot a valid option")
         option = input("\nPlease select an option ([1]/[2]/[3]): ")
-    if option is "1":
-        single_url(device, folder, fileType)
-    elif option is "2":
-        multiple_urls(device, folder, fileType)
-    elif option is "3":
+    if option == "1":
+        single_url(device, folder, filetype)
+    elif option == "2":
+        multiple_urls(device, folder, filetype)
+    elif option == "3":
         sys.exit()
 
     # after all screenshots taken, open the folder containing the screenshots

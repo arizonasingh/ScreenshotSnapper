@@ -1,6 +1,5 @@
-numpy==1.19.1
-pathlib==1.0.1
-Pillow==7.2.0
-PyQt5==5.15.0
+pathlib2==2.3.5
+Pillow==8.1.0
+PyQt5==5.15.2
 selenium==3.141.0
-webdriver-manager==3.2.1
+webdriver-manager==3.2.2

@@ -1,4 +1,4 @@
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 """
 Author: Anmol Singh
 GitHub: https://github.com/arizonasingh/ScreenshotSnapper
@@ -10,25 +10,54 @@ Date Created: 12 Apr 2019
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PIL import Image
-from numpy import loadtxt
 from pathlib import Path
-import os, sys, time, datetime,math
+import os
+import sys
+import time
+import datetime
+import math
 ### IMPORTS END HERE ###
 
 ### GLOBAL VARIABLES BEGIN HERE ###
 device = "D"  # default set to Desktop
-fileType = ".pdf"  # default set to PDF file type
-URL = ""
-URLFile = ""
-appSubmit = False
+filetype = ".pdf"  # default set to PDF file type
+url = ""
+url_file = ""
+app_submit = False
 screenshot = False
 ### GLOBAL VARIABLES END HERE ###
 
 ### GUI BEGINS HERE ###
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
+def set_desktop():
+    global device
+    device = "D"
+
+
+def set_mobile():
+    global device
+    device = "M"
+
+
+def set_tablet():
+    global device
+    device = "T"
+
+
+def set_pdf():
+    global filetype
+    filetype = ".pdf"
+
+
+def set_png():
+    global filetype
+    filetype = ".png"
+
+
+### GUI BEGINS HERE ###
+class UiDialog(object):
+    def setup_ui(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(530, 429)
         self.SubmitBtn = QtWidgets.QPushButton(Dialog)
@@ -83,7 +112,7 @@ class Ui_Dialog(object):
         self.URL.setReadOnly(False)
         self.URL.setClearButtonEnabled(True)
         self.URL.setObjectName("URL")
-        self.URL.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp("^https://.*$"),self.URL))
+        self.URL.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp("^https://.*$"), self.URL))
         self.URLBox.addWidget(self.URL)
         self.MultipleURLsBtn = QtWidgets.QRadioButton(self.verticalLayoutWidget_3)
         self.MultipleURLsBtn.setChecked(False)
@@ -113,28 +142,28 @@ class Ui_Dialog(object):
         self.FileTypeLabel.setGeometry(QtCore.QRect(40, 140, 129, 20))
         self.FileTypeLabel.setObjectName("label_2")
 
-        self.retranslateUi(Dialog)
+        self.retranslate_ui(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
         ### Actionable Steps below ###
         # Set Device
-        self.DesktopBtn.clicked.connect(self.setDesktop)
-        self.MobileBtn.clicked.connect(self.setMobile)
-        self.TabletBtn.clicked.connect(self.setTablet)
+        self.DesktopBtn.clicked.connect(set_desktop)
+        self.MobileBtn.clicked.connect(set_mobile)
+        self.TabletBtn.clicked.connect(set_tablet)
 
         # Set Image File Type
-        self.PDFBtn.clicked.connect(self.setPDF)
-        self.PNGBtn.clicked.connect(self.setPNG)
+        self.PDFBtn.clicked.connect(set_pdf)
+        self.PNGBtn.clicked.connect(set_png)
 
         # Handle single/multiple URL on/off
-        self.SingleURLBtn.clicked.connect(self.setSingleURLBtn)
-        self.MultipleURLsBtn.clicked.connect(self.setMultipleUrlsBtn)
+        self.SingleURLBtn.clicked.connect(self.set_single_url_btn)
+        self.MultipleURLsBtn.clicked.connect(self.set_multiple_urls_btn)
 
         # Set submit and cancel
-        self.SubmitBtn.clicked.connect(self.setSubmitBtn)
-        self.CancelBtn.clicked.connect(self.setCancelBtn)
+        self.SubmitBtn.clicked.connect(self.set_submit_btn)
+        self.CancelBtn.clicked.connect(self.set_cancel_btn)
 
-    def retranslateUi(self, Dialog):
+    def retranslate_ui(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Screenshot Snapper"))
         self.SubmitBtn.setText(_translate("Dialog", "Take Screenshot"))
@@ -152,56 +181,37 @@ class Ui_Dialog(object):
         self.FileTypeLabel.setText(_translate("Dialog", "SAVE IMAGE AS"))
 
     ### Actionable Steps below ###
-    def setDesktop(self):
-        global device
-        device = "D"
 
-    def setMobile(self):
-        global device
-        device = "M"
-
-    def setTablet(self):
-        global device
-        device = "T"
-
-    def setPDF(self):
-        global fileType
-        fileType = ".pdf"
-
-    def setPNG(self):
-        global fileType
-        fileType = ".png"
-
-    def setSingleURLBtn(self):
+    def set_single_url_btn(self):
         self.URLFile.setText("")  # clear out any text if any in opposite field
         self.URLFile.setEnabled(False)  # then disable option for multiple urls button entry
         self.URL.setEnabled(True)  # enable option for single url button entry
 
-    def setMultipleUrlsBtn(self):
+    def set_multiple_urls_btn(self):
         self.URL.setText("")  # clear out any text if any in opposite field
         self.URL.setEnabled(False)  # then disable option for single url button entry
         self.URLFile.setEnabled(True)  # enable option for multiple urls button entry
-        fileOptions = QtWidgets.QFileDialog.Options()
-        fileOptions |= QtWidgets.QFileDialog.DontUseNativeDialog
-        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(None, "Select a Text File", "", "Text Documents (*.txt)",
-                                                            options=fileOptions)
-        self.URLFile.setText(fileName)
+        file_options = QtWidgets.QFileDialog.Options()
+        file_options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(None, "Select a Text File", "", "Text Documents (*.txt)",
+                                                            options=file_options)
+        self.URLFile.setText(filename)
 
-    def setSubmitBtn(self):
-        global URL
-        URL = self.URL.text()
-        global URLFile
-        URLFile = self.URLFile.text()
-        if not (URL.startswith("https://")) and not (URLFile.endswith(".txt")):
-            print("No valid URL entered starting with \"https://\" hence program closing")
-        elif not os.path.exists(URLFile):
+    def set_submit_btn(self):
+        global url
+        url = self.URL.text()
+        global url_file
+        url_file = self.URLFile.text()
+        if not (url.startswith("https://")) and not (url_file.endswith(".txt")):
+            print("Only .txt files supported")
+        elif not len(url_file) == 0 and not os.path.exists(url_file):
             print("That is not a valid file path to a text document")
         else:
-            global appSubmit
-            appSubmit = True
+            global app_submit
+            app_submit = True
         Dialog.close()  # close GUI if user hits submit button
 
-    def setCancelBtn(self):
+    def set_cancel_btn(self):
         sys.exit()  # close program if user hits close button
 
 ### GUI ENDS HERE ###
@@ -209,6 +219,8 @@ class Ui_Dialog(object):
 ### SCREENSHOT CAPTURE BEGINS HERE ###
 class ScreenshotCapture(object):
     def build_driver(self, device):
+        os.environ['WDM_LOCAL'] = '1'
+
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("test-type")
         chrome_options.add_argument("no-sandbox")
@@ -229,21 +241,21 @@ class ScreenshotCapture(object):
         # multi-tasking is not recommended as it will most likely affect the screen capture)
 
         # I am re-sizing the browser window to meet specific device type dimensions
-        if device is "D":
+        if device == "D":
             desktop = {"width": 1920,
                        "height": 1080}  # Should match the screen resolution size for a fully expanded browser
             driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
             time.sleep(0.5)  # add a wait to allow driver to fully initialize
             driver.set_window_size(desktop['width'], desktop["height"])
             time.sleep(0.5)  # add a wait to allow window to fully re-size
-        if device is "M":
+        if device == "M":
             mobile = {"width": 375,
                       "height": 812}  # iPhone X dimensions; can be changed to meet your device configurations
             driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
             time.sleep(0.5)  # add a wait to allow driver to fully initialize
             driver.set_window_size(mobile['width'], mobile["height"])
             time.sleep(0.5)  # add a wait to allow window to fully re-size
-        if device is "T":
+        if device == "T":
             tablet = {"width": 768,
                       "height": 1024}  # iPad / iPad2 / iPad Mini dimensions; can be changed to meet your device
             # configurations
@@ -289,9 +301,9 @@ class ScreenshotCapture(object):
             driver.execute_script(f"window.scrollTo({0}, {rectangle[1]})")
             time.sleep(0.2)
 
-            tmpImgName = f"section_{j}.png"
-            driver.get_screenshot_as_file(tmpImgName)
-            screenshot = Image.open(tmpImgName)
+            tmp_img_name = f"section_{j}.png"
+            driver.get_screenshot_as_file(tmp_img_name)
+            screenshot = Image.open(tmp_img_name)
 
             self.remove_sticky_navs(driver)
 
@@ -303,43 +315,43 @@ class ScreenshotCapture(object):
             stitched_image.paste(screenshot, offset)
 
             del screenshot
-            os.remove(tmpImgName)
+            os.remove(tmp_img_name)
 
         # files have naming restrictions so saving file as the name of the URL (the below list covers filename
         # forbidden characters). Not all below are valid URL characters but if ever functionality changed from URL to
-        # something else as the fileName, the below will cover all restrictions. The file name can be changed below
+        # something else as the filename, the below will cover all restrictions. The file name can be changed below
         # or additional restrictions handled
-        fileName = url.replace("://", "_")
-        fileName = fileName.replace("\\", "_")
-        fileName = fileName.replace("/", "_")
-        fileName = fileName.replace(":", "_")
-        fileName = fileName.replace("*", "_")
-        fileName = fileName.replace("?", "_")
-        fileName = fileName.replace("\"", "_")
-        fileName = fileName.replace("<", "_")
-        fileName = fileName.replace(">", "_")
-        fileName = fileName.replace("|", "_")
+        filename = url.replace("://", "_")
+        filename = filename.replace("\\", "_")
+        filename = filename.replace("/", "_")
+        filename = filename.replace(":", "_")
+        filename = filename.replace("*", "_")
+        filename = filename.replace("?", "_")
+        filename = filename.replace("\"", "_")
+        filename = filename.replace("<", "_")
+        filename = filename.replace(">", "_")
+        filename = filename.replace("|", "_")
 
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime("  %Y-%m-%d %H_%M_%S")
 
-        imagePath = Path.joinpath(folder, fileName + fileType)
+        image_path = Path.joinpath(folder, filename + filetype)
         try:
-            stitched_image.save(imagePath)
+            stitched_image.save(image_path)
         except:
-            fileNameExcessiveLength = True
-            while fileNameExcessiveLength:
-                fileName = fileName[
-                           :-1]  # keep removing last character from fileName until length is short enough to be saved
-                if os.path.exists(imagePath):
-                    fileName = fileName[
-                               :-21] + timestamp  # if by shortening fileName the name already exists in the
+            filename_excessive_length = True
+            while filename_excessive_length:
+                filename = filename[
+                           :-1]  # keep removing last character from filename until length is short enough to be saved
+                if os.path.exists(image_path):
+                    filename = filename[
+                               :-21] + timestamp  # if by shortening filename the name already exists in the
                     # directory, add a timestamp to diferentiate (remove same number of characters as the timestamp
-                    # from fileName)
+                    # from filename)
                 try:
-                    stitched_image.save(imagePath)
-                    fileNameExcessiveLength = False  # end loop if file is saved
+                    stitched_image.save(image_path)
+                    filename_excessive_length = False  # end loop if file is saved
                 except:
-                    fileName = fileName[
+                    filename = filename[
                                :-1]  # not needed again since already at top but it will speed up the process a bit
 
         del stitched_image
@@ -349,7 +361,7 @@ class ScreenshotCapture(object):
         # you need to fit all your page needs examples included below - since it's a try/catch, even if elements are
         # not on the page, the program will not crash
         try:
-            BoxExpand = (driver.find_element_by_xpath(
+            box_expand = (driver.find_element_by_xpath(
                 "//*[contains(text(),'Expand')]")).click()  # for example if a T&C box needed to be expanded to
             # capture full text in screenshot
         except:
@@ -373,35 +385,34 @@ class ScreenshotCapture(object):
             time.sleep(0.1)
 
     def single_url(self, device, folder, filetype):
-        global URL
+        global url
         global screenshot
 
         driver = self.build_driver(device)
-        driver.get(URL)
+        driver.get(url)
 
         self.btn_clicks(driver)
-        self.fullpage_screenshot(driver, URL, device, folder, filetype)
+        self.fullpage_screenshot(driver, url, device, folder, filetype)
         print("Done!")
         screenshot = True
         driver.quit()
 
     def multiple_urls(self, device, folder, filetype):
-        global URLFile
+        global url_file
         global screenshot
 
-        urlList = loadtxt(URLFile, dtype=str, comments="#", delimiter="\n", unpack=False)
+        url_list = open(url_file).read().splitlines()
+        wrong_urls = ""
 
-        wrongURLs = ""
-
-        for url in urlList:
+        for url in url_list:
             if not url.startswith("https://"):
-                wrongURLs += url + "\n"
+                wrong_urls += url + "\n"
 
-        if wrongURLs:
-            print("The following do not start with \"https://\" and must be fixed:\n\n" + wrongURLs)
+        if wrong_urls:
+            print("The following do not start with \"https://\" and must be fixed:\n\n" + wrong_urls)
         else:
             driver = self.build_driver(device)
-            for url in urlList:
+            for url in url_list:
                 driver.get(url)
                 self.btn_clicks(driver)
                 self.fullpage_screenshot(driver, url, device, folder, filetype)
@@ -423,32 +434,32 @@ def open_screenshots(folder):
 
 ### APPLICATION EXECUTION BEGINS HERE ###
 if __name__ == '__main__':
-    ui = Ui_Dialog()
+    ui = UiDialog()
     ss = ScreenshotCapture()
 
     # executing GUI
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()
-    ui.setupUi(Dialog)
+    ui.setup_ui(Dialog)
     Dialog.show()
     app.exec_()
 
     # after GUI closes
-    if appSubmit:
-        if device is "D":
+    if app_submit:
+        if device == "D":
             folder = Path("Screenshots/Desktop")
-        if device is "M":
+        if device == "M":
             folder = Path("Screenshots/Mobile")
-        if device is "T":
+        if device == "T":
             folder = Path("Screenshots/Tablet")
 
         if not os.path.exists(folder):
             os.makedirs(folder)
 
-        if URL:  # if single URL option selected from GUI
-            ss.single_url(device, folder, fileType)
-        elif URLFile:  # if multiple URLs option selected from GUI
-            ss.multiple_urls(device, folder, fileType)
+        if url:  # if single URL option selected from GUI
+            ss.single_url(device, folder, filetype)
+        elif url_file:  # if multiple URLs option selected from GUI
+            ss.multiple_urls(device, folder, filetype)
 
         # after all screenshots taken, open the folder containing the screenshots
         if screenshot:
