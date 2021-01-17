@@ -3,9 +3,9 @@ Allows for webpage screenshot automation for desktop, mobile, and tablet viewpor
 
 Example screenshots included!
 
-## Prerequisites:
-1. Latest version of Google Chrome should be installed
-2. All webpages should be responsive.
+## Key points to keep in mind:
+1. All webpages should be responsive
+2. Maximum supported image dimension is 65500 pixels
 
 ## Additional Details:
 If you encounter sticky nav bars on the webpage, you must enter javascript into the webpage to handle those (this can be done via the program). Since those are different for each webpage, I have included a couple examples in the code to show how it should be done and where it should be done. The same goes for any page interactions needed on the page before screen capture such as clicking a button.
@@ -19,7 +19,5 @@ I use the Google Chrome extension heavily but wanted to automate the process so 
 Special thanks to this willjobs of https://github.com/willjobs/fullpage-screenshot.
 The code for screen capture and page scrolling (key feature) was adapted from that repo.
 
-## Final Remarks:
-Please do not contact me to make a version for you with your exact web needs. I have tried to make it as easy as possible for customization with many comments throughout the code. I have a Full-Time job and unfortunately cannot create unique versions for everyone. However, if there are any questions or inquiries, I will try and monitor this repo in my spare time and answer to the best of my ability.
 
 Have fun taking screenshots! :)
