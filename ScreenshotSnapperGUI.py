@@ -361,7 +361,7 @@ class ScreenshotCapture(object):
         # you need to fit all your page needs examples included below - since it's a try/catch, even if elements are
         # not on the page, the program will not crash
         try:
-            box_expand = (driver.find_element_by_xpath(
+            (driver.find_element_by_xpath(
                 "//*[contains(text(),'Expand')]")).click()  # for example if a T&C box needed to be expanded to
             # capture full text in screenshot
         except:
