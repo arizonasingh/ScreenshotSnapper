@@ -18,6 +18,3 @@ I use the Google Chrome extension heavily but wanted to automate the process so 
 
 Special thanks to this willjobs of https://github.com/willjobs/fullpage-screenshot.
 The code for screen capture and page scrolling (key feature) was adapted from that repo.
-
-
-Have fun taking screenshots! :)
