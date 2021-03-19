@@ -1,5 +1,5 @@
 pathlib2==2.3.5
-Pillow==8.1.0
+Pillow==8.1.1
 PyQt5==5.15.2
 selenium==3.141.0
 webdriver-manager==3.2.2
