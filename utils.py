@@ -1,3 +1,10 @@
+"""
+Author: Anmol Singh
+GitHub: https://github.com/arizonasingh/ScreenshotSnapper
+Purpose: To abstract common functionality into a single file that can be shared with cli and gui programs
+Date Created: 15 July 2023
+"""
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager

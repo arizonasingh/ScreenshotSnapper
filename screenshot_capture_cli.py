@@ -44,7 +44,6 @@ class ScreenshotCaptureCLI:
         print("Done!")
         self.driver.quit()
 
-
     def multiple_urls(self, folder, filetype):
         url_file = input("\nPlease drag a \".txt\" file here containing all the URLs on a new line: ")
 
@@ -67,7 +66,6 @@ class ScreenshotCaptureCLI:
 
         print("Done!")
         self.driver.quit()
-
 
 def get_valid_input(prompt, valid_options):
     while True:
