@@ -19,6 +19,9 @@ import time
 import datetime
 import math
 
+DEVICE_OPTIONS = {"1": "desktop", "2": "mobile", "3": "tablet"}
+FILE_TYPE_OPTIONS = {"1": ".pdf", "2": ".png"}
+
 device = "D"  # default set to Desktop
 filetype = ".pdf"  # default set to PDF file type
 url = ""
@@ -210,7 +213,7 @@ class UiDialog(object):
         sys.exit()  # close program if user hits close button
 
 
-class ScreenshotCapture(object):
+class ScreenshotCaptureGUI(object):
     def build_driver(self, device):
         os.environ['WDM_LOCAL'] = '1'
 
@@ -423,7 +426,7 @@ def open_screenshots(folder):
 
 if __name__ == '__main__':
     ui = UiDialog()
-    ss = ScreenshotCapture()
+    ss = ScreenshotCaptureGUI()
 
     # executing GUI
     app = QtWidgets.QApplication(sys.argv)
