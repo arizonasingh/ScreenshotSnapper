@@ -1,4 +1,3 @@
-__version__ = "3.0.0"
 """
 Author: Anmol Singh
 GitHub: https://github.com/arizonasingh/ScreenshotSnapper
@@ -6,9 +5,10 @@ Purpose: To automate the process of capturing full web page screenshots in multi
 Date Created: 12 Apr 2019
 """
 
-### IMPORTS BEGIN HERE ###
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PIL import Image
@@ -18,18 +18,14 @@ import sys
 import time
 import datetime
 import math
-### IMPORTS END HERE ###
 
-### GLOBAL VARIABLES BEGIN HERE ###
 device = "D"  # default set to Desktop
 filetype = ".pdf"  # default set to PDF file type
 url = ""
 url_file = ""
 app_submit = False
 screenshot = False
-### GLOBAL VARIABLES END HERE ###
 
-### GUI BEGINS HERE ###
 def set_desktop():
     global device
     device = "D"
@@ -55,7 +51,6 @@ def set_png():
     filetype = ".png"
 
 
-### GUI BEGINS HERE ###
 class UiDialog(object):
     def setup_ui(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -214,9 +209,7 @@ class UiDialog(object):
     def set_cancel_btn(self):
         sys.exit()  # close program if user hits close button
 
-### GUI ENDS HERE ###
 
-### SCREENSHOT CAPTURE BEGINS HERE ###
 class ScreenshotCapture(object):
     def build_driver(self, device):
         os.environ['WDM_LOCAL'] = '1'
@@ -232,26 +225,22 @@ class ScreenshotCapture(object):
         chrome_options.add_argument("--disable-default-apps")
         chrome_options.add_argument("test-type=browser")
         chrome_options.add_argument("disable-infobars")
-        chrome_options.add_argument(
-            "log-level=3")  # Determines which console logs should be shown. Set to 0 for all messages, 1 for INFO
-        # and above, 2 for ERROR and above, and 3 for FATAL
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("log-level=3")  # 0 = ALL, 1 = INFO, 2 = ERROR, 3 = FATAL
         chrome_options.add_experimental_option("useAutomationExtension", False)
-        chrome_options.headless = True  # Set to true to run the program in the background (multi-tasking on other
-        # tasks is possible). Set to false to see the program running (warning: browser will open on screen so
-        # multi-tasking is not recommended as it will most likely affect the screen capture)
 
         # I am re-sizing the browser window to meet specific device type dimensions
         if device == "D":
             desktop = {"width": 1920,
                        "height": 1080}  # Should match the screen resolution size for a fully expanded browser
-            driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
             time.sleep(0.5)  # add a wait to allow driver to fully initialize
             driver.set_window_size(desktop['width'], desktop["height"])
             time.sleep(0.5)  # add a wait to allow window to fully re-size
         if device == "M":
             mobile = {"width": 375,
                       "height": 812}  # iPhone X dimensions; can be changed to meet your device configurations
-            driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
             time.sleep(0.5)  # add a wait to allow driver to fully initialize
             driver.set_window_size(mobile['width'], mobile["height"])
             time.sleep(0.5)  # add a wait to allow window to fully re-size
@@ -259,7 +248,7 @@ class ScreenshotCapture(object):
             tablet = {"width": 768,
                       "height": 1024}  # iPad / iPad2 / iPad Mini dimensions; can be changed to meet your device
             # configurations
-            driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
             time.sleep(0.5)  # add a wait to allow driver to fully initialize
             driver.set_window_size(tablet['width'], tablet["height"])
             time.sleep(0.5)  # add a wait to allow window to fully re-size
@@ -331,6 +320,7 @@ class ScreenshotCapture(object):
         filename = filename.replace("<", "_")
         filename = filename.replace(">", "_")
         filename = filename.replace("|", "_")
+        filename = filename.replace(".", "_")
 
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime("  %Y-%m-%d %H_%M_%S")
 
@@ -361,13 +351,13 @@ class ScreenshotCapture(object):
         # you need to fit all your page needs examples included below - since it's a try/catch, even if elements are
         # not on the page, the program will not crash
         try:
-            (driver.find_element_by_xpath(
+            (driver.find_element(By.XPATH,
                 "//*[contains(text(),'Expand')]")).click()  # for example if a T&C box needed to be expanded to
             # capture full text in screenshot
         except:
             time.sleep(0.1)
 
-        driver.find_element_by_tag_name('body').send_keys(
+        driver.find_element(By.TAG_NAME,'body').send_keys(
             Keys.CONTROL + Keys.HOME)  # returning to top of page after clicking buttons
 
     def remove_sticky_navs(self, driver):
@@ -422,8 +412,6 @@ class ScreenshotCapture(object):
             driver.quit()
 
 
-### SCREENSHOT CAPTURE ENDS HERE ###
-
 def open_screenshots(folder):
     if sys.platform == "win32":
         os.startfile(folder)
@@ -432,7 +420,7 @@ def open_screenshots(folder):
     elif sys.platform == "linux":
         os.system('xdg-open "%s"' % folder)
 
-### APPLICATION EXECUTION BEGINS HERE ###
+
 if __name__ == '__main__':
     ui = UiDialog()
     ss = ScreenshotCapture()
@@ -464,5 +452,3 @@ if __name__ == '__main__':
         # after all screenshots taken, open the folder containing the screenshots
         if screenshot:
             open_screenshots(folder)
-
-### APPLICATION EXECUTION ENDS HERE ###
