@@ -22,7 +22,6 @@ FILE_TYPE_OPTIONS = {"1": ".pdf", "2": ".png"}
 class ScreenshotCaptureCLI:
     def __init__(self, device_type):
         self.driver = create_webdriver(device_type)
-        self.folder = get_folder(device_type)
 
     def fullpage_screenshot(self, url, folder, filetype):
         print(f"Taking screenshot of {url}")
@@ -183,13 +182,14 @@ class ScreenshotCaptureCLI:
         print("Done!")
         self.driver.quit()
 
-    def open_screenshots(self, folder):
-        if sys.platform == "win32":
-            os.startfile(folder)
-        elif sys.platform == "darwin":
-            os.system('open "%s"' % folder)
-        elif sys.platform == "linux":
-            os.system('xdg-open "%s"' % folder)
+
+def open_screenshots(folder):
+    if sys.platform == "win32":
+        os.startfile(folder)
+    elif sys.platform == "darwin":
+        os.system('open "%s"' % folder)
+    elif sys.platform == "linux":
+        os.system('xdg-open "%s"' % folder)
 
 def get_valid_input(prompt, valid_options):
     while True:
@@ -202,8 +202,8 @@ if __name__ == '__main__':
     device = get_valid_input("Please select a device ([1] Desktop | [2] Mobile | [3] Tablet): ", DEVICE_OPTIONS.keys())
     device = DEVICE_OPTIONS[device] # convert option to value
 
-    filetype = get_valid_input("\nSave image as ([1] PDF | [2] PNG): ", FILE_TYPE_OPTIONS.keys())
-    filetype = FILE_TYPE_OPTIONS[filetype] # convert option to value
+    file_extension = get_valid_input("\nSave image as ([1] PDF | [2] PNG): ", FILE_TYPE_OPTIONS.keys())
+    file_extension = FILE_TYPE_OPTIONS[file_extension] # convert option to value
 
     print("""
     ***NOTE: All URLs must start with "https://" and for Mobile and Tablet screenshots to be captured properly,
@@ -221,15 +221,15 @@ if __name__ == '__main__':
         sys.exit()
     else:
         screenshotCapture = ScreenshotCaptureCLI(device)
-        folder = screenshotCapture.folder
+        screenshot_dir = get_folder(device)
 
-        if not os.path.exists(folder):
-            os.makedirs(folder)
+        if not os.path.exists(screenshot_dir):
+            os.makedirs(screenshot_dir)
 
         if option == "1":
-            screenshotCapture.single_url(folder, filetype)
+            screenshotCapture.single_url(screenshot_dir, file_extension)
         elif option == "2":
-            screenshotCapture.multiple_urls(folder, filetype)
+            screenshotCapture.multiple_urls(screenshot_dir, file_extension)
 
         # after all screenshots taken, open the folder containing the screenshots
-        screenshotCapture.open_screenshots(folder)
+        open_screenshots(screenshot_dir)
