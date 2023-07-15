@@ -16,8 +16,7 @@ def remove_sticky_navs(driver):
     # examples included below - since it's a try/catch, even if elements are not on the page, the program will not crash
     try:
         # nav bar can be removed or fixed into place (static or absolute work
-        # in most cases for position property - try .attr('style','position: static !important'); instead of .remove(
-        # );)
+        # in most cases for position property - try .attr('style','position: static !important'); instead of .remove();)
         driver.execute_script(
             "$('.header-wrapper').remove();")  # header-wrapper is common bootstrap nav bar class name
         time.sleep(0.1)
@@ -29,18 +28,16 @@ def click_buttons(driver):
     # add as many try/except clauses as you need to fit all your page needs
     # examples included below - since it's a try/catch, even if elements are not on the page, the program will not crash
     try:
-        driver.find_element(By.XPATH,
-            "//*[contains(text(),'Expand')]").click()  # for example if a T&C box needed to be expanded to capture
-        # full text in screenshot
+        # example: a T&C box needed to be expanded to capture full text in screenshot
+        driver.find_element(By.XPATH, "//*[contains(text(),'Expand')]").click()
     except:
         time.sleep(0.1)
 
-    driver.find_element(By.TAG_NAME,'body').send_keys(
-        Keys.CONTROL + Keys.HOME)  # returning to top of page after clicking buttons
+    # returning to top of page after clicking buttons
+    driver.find_element(By.TAG_NAME,'body').send_keys(Keys.CONTROL + Keys.HOME)
 
 def remove_scrollbar(driver):
     # remove the browser vertical right side scrollbar from the screenshot
-    # should work in all pages but since it is Javascript, it's good practice to enter in a try/except
     try:
         driver.execute_script("document.body.style.overflow = 'hidden';")
     except:
@@ -97,12 +94,12 @@ def save_screenshot(stitched_image, image_path, filename):
     except:
         filename_excessive_length = True
         while filename_excessive_length:
-            filename = filename[:-1]  # keep removing last character from filename until length is short enough to be
-            # saved
+            # keep removing last character from filename until length is short enough to be saved
+            filename = filename[:-1]
             if os.path.exists(image_path):
-                filename = filename[:-21] + timestamp  # if by shortening filename the name already exists in the
-                # directory, add a timestamp to differentiate (remove same number of characters as the timestamp from
-                # filename)
+                # if by shortening filename the name already exists in the directory, add a timestamp to differentiate
+                # (remove same number of characters as the timestamp from filename)
+                filename = filename[:-21] + timestamp
             try:
                 stitched_image.save(image_path)
                 filename_excessive_length = False  # end loop if file is saved
