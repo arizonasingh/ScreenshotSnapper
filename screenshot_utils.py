@@ -11,9 +11,12 @@ import os
 import time
 
 from PIL import Image
+from pathlib import Path
 
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
+
+from utils import rename_file
 
 
 def remove_sticky_navs(driver):
@@ -114,3 +117,15 @@ def save_screenshot(stitched_image, image_path, filename):
                 filename = filename[:-1]  # not needed again since already at top but it will speed up the process a bit
 
     del stitched_image
+
+def capture_fullpage_screenshot(driver, url, folder, filetype):
+    print(f"Taking screenshot of {url}")
+
+    click_buttons(driver)
+    remove_scrollbar(driver)
+
+    stitched_image = stitch_fullpage_screenshot(driver)
+    filename = rename_file(url)
+    image_path = Path.joinpath(folder, filename + filetype)
+
+    save_screenshot(stitched_image, image_path, filename)

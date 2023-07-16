@@ -7,10 +7,9 @@ Date Created: 12 Apr 2019
 
 import os
 import sys
-from pathlib import Path
 
-from screenshot_utils import click_buttons, remove_scrollbar, stitch_fullpage_screenshot, save_screenshot
-from utils import create_webdriver, get_folder, open_screenshots, rename_file
+from screenshot_utils import capture_fullpage_screenshot
+from utils import create_webdriver, get_folder, open_screenshots
 
 DEVICE_OPTIONS = {"1": "desktop", "2": "mobile", "3": "tablet"}
 FILE_TYPE_OPTIONS = {"1": ".pdf", "2": ".png"}
@@ -20,18 +19,6 @@ class ScreenshotCaptureCLI:
     def __init__(self, device_type):
         self.driver = create_webdriver(device_type)
 
-    def fullpage_screenshot(self, url, folder, filetype):
-        print(f"Taking screenshot of {url}")
-
-        click_buttons(self.driver)
-        remove_scrollbar(self.driver)
-
-        stitched_image = stitch_fullpage_screenshot(self.driver)
-        filename = rename_file(url)
-        image_path = Path.joinpath(folder, filename + filetype)
-
-        save_screenshot(stitched_image, image_path, filename)
-
     def single_url(self, folder, filetype):
         url = input("\nEnter the URL: ")
 
@@ -40,7 +27,7 @@ class ScreenshotCaptureCLI:
 
         self.driver.get(url)
 
-        self.fullpage_screenshot(url, folder, filetype)
+        capture_fullpage_screenshot(self.driver, url, folder, filetype)
         print("Done!")
         self.driver.quit()
 
@@ -62,7 +49,7 @@ class ScreenshotCaptureCLI:
 
         for url in url_list:
             self.driver.get(url)
-            self.fullpage_screenshot(url, folder, filetype)
+            capture_fullpage_screenshot(self.driver, url, folder, filetype)
 
         print("Done!")
         self.driver.quit()
