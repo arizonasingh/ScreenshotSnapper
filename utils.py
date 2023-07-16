@@ -1,15 +1,18 @@
 """
 Author: Anmol Singh
 GitHub: https://github.com/arizonasingh/ScreenshotSnapper
-Purpose: To abstract common functionality into a single file that can be shared with cli and gui programs
+Purpose: To store common functionality into a single file that can be shared with cli and gui programs
 Date Created: 15 July 2023
 """
+import os
+import subprocess
+import sys
+from pathlib import Path
+from urllib.parse import urlparse
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from pathlib import Path
-import sys, os, subprocess
 
 from config import SCREEN_SIZES, FOLDER_DIRECTORIES
 
@@ -59,7 +62,6 @@ def open_screenshots(folder):
     except subprocess.CalledProcessError:
         print("Failed to open the folder.")
 
-
 def rename_file(filename):
     characters_to_replace = ["://", "\\", "/", ":", "*", "?", "\"", "<", ">", "|", ".", "=", "%"]
 
@@ -67,3 +69,11 @@ def rename_file(filename):
         filename = filename.replace(char, "_")
 
     return filename
+
+def is_valid_url(url):
+    parsed_url = urlparse(url)
+
+    if parsed_url.netloc:
+        return True
+
+    return False

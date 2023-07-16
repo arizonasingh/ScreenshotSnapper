@@ -9,7 +9,7 @@ import os
 import sys
 
 from screenshot_utils import capture_fullpage_screenshot
-from utils import create_webdriver, get_folder, open_screenshots
+from utils import create_webdriver, get_folder, open_screenshots, is_valid_url
 
 DEVICE_OPTIONS = {"1": "desktop", "2": "mobile", "3": "tablet"}
 FILE_TYPE_OPTIONS = {"1": ".pdf", "2": ".png"}
@@ -20,10 +20,12 @@ class ScreenshotCaptureCLI:
         self.driver = create_webdriver(device_type)
 
     def single_url(self, folder, filetype):
-        url = input("\nEnter the URL: ")
+        while True:
+            url = input("\nEnter the URL: ")
+            if is_valid_url(url):
+                break
 
-        while not url.startswith("https://"):
-            url = input("\nInvalid URL! Please enter a URL that starts with \"https://\": ")
+            print("\nInvalid URL! Please enter a valid URL.")
 
         self.driver.get(url)
 
@@ -32,19 +34,21 @@ class ScreenshotCaptureCLI:
         self.driver.quit()
 
     def multiple_urls(self, folder, filetype):
-        url_file = input("\nPlease drag a \".txt\" file here containing all the URLs on a new line: ")
+        url_file = input("\nPlease drag a text (.txt) file here containing all the URLs on a new line "
+                         "or enter the filepath to the file: ")
 
         while not url_file.endswith(".txt") or not os.path.exists(url_file):
-            url_file = input("\nThat is not a valid file. Please drag a \".txt\" file here: ")
+            url_file = input("\nThat is an invalid file. Please drag a text(.txt) file here "
+                             "or enter the filepath to the file: ")
 
         with open(url_file) as file:
             url_list = file.read().splitlines()
 
-        wrong_urls = [url for url in url_list if not url.startswith("https://")]
+        wrong_urls = "\n".join(url for url in url_list if not is_valid_url(url))
 
         if wrong_urls:
-            print("The following do not start with \"https://\" and must be fixed:\n")
-            print("\n".join(wrong_urls))
+            print("\nThe following are invalid URLs and must be fixed:")
+            print("\n".join(wrong_urls.splitlines()))
             sys.exit()
 
         for url in url_list:
@@ -69,9 +73,8 @@ if __name__ == '__main__':
     file_extension = FILE_TYPE_OPTIONS[file_extension] # convert option to value
 
     print("""
-    ***NOTE: All URLs must start with "https://" and for Mobile and Tablet screenshots to be captured properly,
-    the web page must be responsive***"""
-          )
+    *** NOTE: For Mobile and Tablet screenshots to be captured properly, the web page must be responsive ***
+    """)
     option = get_valid_input("""
     [1] Single URL
     [2] Multiple URLs

@@ -1,7 +1,7 @@
 """
 Author: Anmol Singh
 GitHub: https://github.com/arizonasingh/ScreenshotSnapper
-Purpose: To abstract common screenshot functionality into a single file that can be shared with cli and gui programs
+Purpose: To store common screenshot functionality into a single file that can be shared with cli and gui programs
 Date Created: 15 July 2023
 """
 
@@ -17,7 +17,6 @@ from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 
 from utils import rename_file
-
 
 def remove_sticky_navs(driver):
     # many pages will have at least one sticky nav bar

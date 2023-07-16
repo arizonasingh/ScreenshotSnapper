@@ -11,7 +11,7 @@ import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from screenshot_utils import capture_fullpage_screenshot
-from utils import create_webdriver, get_folder, open_screenshots
+from utils import create_webdriver, get_folder, open_screenshots, is_valid_url
 
 DEVICE_OPTIONS = {"1": "desktop", "2": "mobile", "3": "tablet"}
 FILE_TYPE_OPTIONS = {"1": ".pdf", "2": ".png"}
@@ -21,7 +21,7 @@ file_extension = "2"  # default set to PNG file type
 url = ""
 url_file = ""
 app_submit = False
-screenshot = False
+is_screenshot_captured = False
 
 def set_desktop():
     global device
@@ -99,7 +99,7 @@ class UiDialog(object):
         self.URL.setReadOnly(False)
         self.URL.setClearButtonEnabled(True)
         self.URL.setObjectName("URL")
-        self.URL.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp("^https://.*$"), self.URL))
+        self.URL.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp("^(http(s)?://).*"), self.URL))
         self.URLBox.addWidget(self.URL)
         self.MultipleURLsBtn = QtWidgets.QRadioButton(self.verticalLayoutWidget_3)
         self.MultipleURLsBtn.setChecked(False)
@@ -160,8 +160,8 @@ class UiDialog(object):
         self.PDFBtn.setText(_translate("Dialog", "PDF"))
         self.PNGBtn.setText(_translate("Dialog", "PNG"))
         self.SingleURLBtn.setText(_translate("Dialog", "Single URL"))
-        self.URL.setPlaceholderText(_translate("Dialog", "URL must start with https://"))
-        self.URLFile.setPlaceholderText(_translate("Dialog", "Enter text file containing URLs"))
+        self.URL.setPlaceholderText(_translate("Dialog", "URL must be valid"))
+        self.URLFile.setPlaceholderText(_translate("Dialog", "Enter text (.txt) file containing list of URLs"))
         self.MultipleURLsBtn.setText(_translate("Dialog", "Multiple URLs"))
         self.CancelBtn.setText(_translate("Dialog", "Close Program"))
         self.DeviceLabel.setText(_translate("Dialog", "SELECT A DEVICE"))
@@ -189,10 +189,10 @@ class UiDialog(object):
         url = self.URL.text()
         global url_file
         url_file = self.URLFile.text()
-        if not (url.startswith("https://")) and not (url_file.endswith(".txt")):
-            print("Only .txt files supported")
+        if not is_valid_url(url) and not (url_file.endswith(".txt")):
+            print("Only text (.txt) files supported")
         elif not len(url_file) == 0 and not os.path.exists(url_file):
-            print("That is not a valid file path to a text document")
+            print("That is not a valid file path to a text (.txt) document")
         else:
             global app_submit
             app_submit = True
@@ -208,27 +208,27 @@ class ScreenshotCaptureGUI(object):
 
     def single_url(self, folder, filetype):
         global url
-        global screenshot
+        global is_screenshot_captured
 
         self.driver.get(url)
 
         capture_fullpage_screenshot(self.driver, url, folder, filetype)
         print("Done!")
-        screenshot = True
+        is_screenshot_captured = True
         self.driver.quit()
 
     def multiple_urls(self, folder, filetype):
         global url_file
-        global screenshot
+        global is_screenshot_captured
 
         with open(url_file) as file:
             url_list = file.read().splitlines()
 
-        wrong_urls = [url for url in url_list if not url.startswith("https://")]
+        wrong_urls = "\n".join(url for url in url_list if not is_valid_url(url))
 
         if wrong_urls:
-            print("The following do not start with \"https://\" and must be fixed:\n")
-            print("\n".join(wrong_urls))
+            print("\nThe following are invalid URLs and must be fixed:")
+            print("\n".join(wrong_urls.splitlines()))
             sys.exit()
 
         for url in url_list:
@@ -236,7 +236,7 @@ class ScreenshotCaptureGUI(object):
             capture_fullpage_screenshot(self.driver, url, folder, filetype)
 
         print("Done!")
-        screenshot = True
+        is_screenshot_captured = True
         self.driver.quit()
 
 if __name__ == '__main__':
@@ -266,5 +266,5 @@ if __name__ == '__main__':
             screenshotCapture.multiple_urls(screenshot_dir, file_extension)
 
         # after all screenshots taken, open the folder containing the screenshots
-        if screenshot:
+        if is_screenshot_captured:
             open_screenshots(screenshot_dir)
